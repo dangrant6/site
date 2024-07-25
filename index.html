@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel - Portfolio</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #1a0011;
+            --text-color: #8FBCE6;
+            --highlight-color: #ffffff;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+        #particles-js, #baseball-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .baseball-icon {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .baseball-icon .baseball {
+            fill: var(--text-color);
+        }
+        .baseball-icon .stitches {
+            fill: none;
+            stroke: var(--bg-color);
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .section-title {
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        li::before {
+            content: "• ";
+            color: var(--text-color);
+        }
+        a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--highlight-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        a:hover {
+            color: var(--highlight-color);
+        }
+        a:hover::after {
+            transform: scaleX(1);
+        }
+        .highlight {
+            color: var(--highlight-color);
+            font-weight: bold;
+        }
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .light-mode {
+            --bg-color: #f0f8ff;
+            --text-color: #1a0011;
+            --highlight-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <canvas id="baseball-canvas"></canvas>
+    <button id="theme-toggle"><i class="fas fa-moon"></i></button>
+    <div class="container">
+        <svg class="baseball-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle class="baseball" cx="50" cy="50" r="45"/>
+            <path class="stitches" d="M50 5 C 50 95, 50 95, 50 5" />
+            <path class="stitches" d="M5 50 C 95 50, 95 50, 5 50" />
+        </svg>
+        <h1>Daniel</h1>
+        
+        <div class="section">
+            <p id="typed-text"></p>
+            <p>> I'm currently an <span class="highlight">AI research intern</span></p>
+        </div>
+
+        <div class="section">
+            <p class="section-title">interests :</p>
+            <p>rl/robotics, hockey, baseball, call of duty, and pokemon</p>
+        </div>
+
+        <div class="section">
+            <p class="section-title">take a look at</p>
+            <ul>
+                <li><a href="#" id="random-project"><i class="fas fa-project-diagram"></i> some random project... ></a></li>
+                <li><a href="https://github.com/dangrant6" target="_blank"><i class="fab fa-github"></i> full github... ></a></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <p class="section-title">my links</p>
+            <ul>
+                <li><a href="https://www.instagram.com/dangrant6/" target="_blank"><i class="fab fa-instagram"></i> insta</a></li>
+                <li><a href="https://www.linkedin.com/in/danielgrant6" target="_blank"><i class="fab fa-linkedin"></i> linkedin</a></li>
+                <li><a href="mailto:danielwgrant6@gmail.com"><i class="far fa-envelope"></i> email me ♥</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const icon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            if (body.classList.contains('light-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+
+            // Update particle color
+            const newColor = getComputedStyle(document.body).getPropertyValue('--text-color');
+            pJSDom[0].pJS.particles.color.value = newColor;
+            pJSDom[0].pJS.particles.line_linked.color = newColor;
+            pJSDom[0].pJS.fn.particlesRefresh();
+        });
+
+        // Random project link functionality
+        const randomProjectLink = document.getElementById('random-project');
+        const projectLinks = [
+            'https://github.com/dangrant6/poke-battle-ai',
+            'https://github.com/dangrant6/lil-alchemy',
+            'https://velozenstudios.com'
+        ];
+
+        randomProjectLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            const randomIndex = Math.floor(Math.random() * projectLinks.length);
+            window.open(projectLinks[randomIndex], '_blank');
+        });
+
+        // Typing effect
+        const typedTextElement = document.getElementById('typed-text');
+        const textToType = "I'm an athlete, comp sci student & I like to make games";
+        let i = 0;
+
+        function typeWriter() {
+            if (i < textToType.length) {
+                typedTextElement.innerHTML += textToType.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            }
+        }
+
+        typeWriter();
+
+        // Particle.js configuration
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#8FBCE6' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: false },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#8FBCE6', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: false }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 } }
+            },
+            retina_detect: true
+        });
+
+        // Baseball simulator
+        const canvas = document.getElementById('baseball-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+
+        let baseballs = [];
+
+        class Baseball {
+            constructor(x, y, dx, dy) {
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+                this.radius = 5;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-color');
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            update() {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy;
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.dy += 0.1; // Gravity
+
+                this.draw();
+            }
+        }
+
+        function throwBaseball(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const dx = (Math.random() - 0.5) * 10;
+            const dy = -10 - Math.random() * 5; // Throw upwards
+            baseballs.push(new Baseball(x, y, dx, dy));
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            baseballs.forEach((baseball, index) => {
+                baseball.update();
+                if (baseball.y > canvas.height + baseball.radius) {
+                    baseballs.splice(index, 1);
+                }
+            });
+        }
+
+        document.addEventListener('click', throwBaseball);
+        window.addEventListener('resize', resizeCanvas);
+
+        animate();
+    </script>
+</body>
+</html>
