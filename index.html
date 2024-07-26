@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daniel - Portfolio</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦾</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -29,6 +29,10 @@
             width: 100%;
             height: 100%;
             z-index: -1;
+        }
+        #baseball-canvas {
+            display: none;
+            cursor: none;
         }
         .container {
             max-width: 800px;
@@ -112,36 +116,56 @@
             color: var(--highlight-color);
             font-weight: bold;
         }
-        #theme-toggle {
+        .toggle-buttons {
             position: fixed;
             top: 20px;
             right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        .toggle-button {
             background: none;
             border: none;
             color: var(--text-color);
             font-size: 1.5em;
             cursor: pointer;
-            z-index: 1000;
         }
         .light-mode {
             --bg-color: #f0f8ff;
             --text-color: #1a0011;
             --highlight-color: #0056b3;
         }
+        #score-display {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: var(--text-color);
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div id="particles-js"></div>
     <canvas id="baseball-canvas"></canvas>
-    <button id="theme-toggle"><i class="fas fa-moon"></i></button>
+    <div id="score-display">Score: 0</div> <!-- score for game -->
+    <div class="toggle-buttons">
+        <button id="baseball-toggle" class="toggle-button"><i class="fas fa-baseball-ball"></i></button> <!-- game toggle button -->
+        <button id="theme-toggle" class="toggle-button"><i class="fas fa-moon"></i></button> <!-- light/dark mode button -->
+    </div>
     <div class="container">
+        <!-- attempt at a baseball svg -->
         <svg class="baseball-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle class="baseball" cx="50" cy="50" r="45"/>
             <path class="stitches" d="M50 5 C 50 95, 50 95, 50 5" />
             <path class="stitches" d="M5 50 C 95 50, 95 50, 5 50" />
         </svg>
         <h1>Daniel</h1>
-        
+        <!-- bulk of content -->
         <div class="section">
             <p id="typed-text"></p>
             <p>> I'm currently an <span class="highlight">AI research intern</span></p>
@@ -165,14 +189,14 @@
             <ul>
                 <li><a href="https://www.instagram.com/dangrant6/" target="_blank"><i class="fab fa-instagram"></i> insta</a></li>
                 <li><a href="https://www.linkedin.com/in/danielgrant6" target="_blank"><i class="fab fa-linkedin"></i> linkedin</a></li>
-                <li><a href="mailto:danielwgrant6@gmail.com"><i class="far fa-envelope"></i> email me ♥</a></li>
+                <li><a href="mailto:danielwgrant6@gmail.com"><i class="far fa-envelope"></i> email me</a></li>
             </ul>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        // Theme toggle functionality
+        // light/dark  mode
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
         const icon = themeToggle.querySelector('i');
@@ -187,14 +211,14 @@
                 icon.classList.add('fa-moon');
             }
 
-            // Update particle color
+            // particle color
             const newColor = getComputedStyle(document.body).getPropertyValue('--text-color');
             pJSDom[0].pJS.particles.color.value = newColor;
             pJSDom[0].pJS.particles.line_linked.color = newColor;
             pJSDom[0].pJS.fn.particlesRefresh();
         });
 
-        // Random project link functionality
+        // pick random project to link to
         const randomProjectLink = document.getElementById('random-project');
         const projectLinks = [
             'https://github.com/dangrant6/poke-battle-ai',
@@ -208,7 +232,7 @@
             window.open(projectLinks[randomIndex], '_blank');
         });
 
-        // Typing effect
+        // typing effect for the first line
         const typedTextElement = document.getElementById('typed-text');
         const textToType = "I'm an athlete, comp sci student & I like to make games";
         let i = 0;
@@ -223,7 +247,7 @@
 
         typeWriter();
 
-        // Particle.js configuration
+        // particle.js
         particlesJS('particles-js', {
             particles: {
                 number: { value: 80, density: { enable: true, value_area: 800 } },
@@ -242,9 +266,10 @@
             retina_detect: true
         });
 
-        // Baseball simulator
+        // pong/baseball game 
         const canvas = document.getElementById('baseball-canvas');
         const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score-display');
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -253,67 +278,112 @@
 
         resizeCanvas();
 
-        let baseballs = [];
+        let bat = {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 10,
+            borderWidth: 3
+        };
 
-        class Baseball {
-            constructor(x, y, dx, dy) {
-                this.x = x;
-                this.y = y;
-                this.dx = dx;
-                this.dy = dy;
-                this.radius = 5;
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height - 30,
+            dx: 5,
+            dy: -5,
+            radius: 10
+        };
+
+        let score = 0;
+
+        function drawBat() {
+            ctx.beginPath();
+            ctx.rect(bat.x - bat.width / 2, bat.y - bat.height / 2, bat.width, bat.height);
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-color');
+            ctx.fill();
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--highlight-color');
+            ctx.lineWidth = bat.borderWidth;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--highlight-color');
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function moveBall() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // collision with walls
+            if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                ball.dx = -ball.dx;
+            }
+            if (ball.y - ball.radius < 0) {
+                ball.dy = -ball.dy;
             }
 
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-color');
-                ctx.fill();
-                ctx.closePath();
+            // collision with bat
+            if (ball.y + ball.radius > bat.y - bat.height / 2 - bat.borderWidth &&
+                ball.y - ball.radius < bat.y + bat.height / 2 + bat.borderWidth &&
+                ball.x > bat.x - bat.width / 2 - bat.borderWidth &&
+                ball.x < bat.x + bat.width / 2 + bat.borderWidth) {
+                ball.dy = -ball.dy;
+                // make hits somewhat random
+                ball.dx = (ball.x - bat.x) / 5;
+                score++;
+                updateScore();
             }
 
-            update() {
-                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
-                    this.dx = -this.dx;
-                }
-                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
-                    this.dy = -this.dy;
-                }
-
-                this.x += this.dx;
-                this.y += this.dy;
-
-                this.dy += 0.1; // Gravity
-
-                this.draw();
+            // reset ball if it goes below the bat
+            if (ball.y + ball.radius > canvas.height) {
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height - 30;
+                ball.dx = 5;
+                ball.dy = -5;
             }
         }
 
-        function throwBaseball(e) {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const dx = (Math.random() - 0.5) * 10;
-            const dy = -10 - Math.random() * 5; // Throw upwards
-            baseballs.push(new Baseball(x, y, dx, dy));
+        function updateScore() {
+            scoreDisplay.textContent = `Score: ${score}`;
         }
 
         function animate() {
+            if (!isBaseballActive) return;
             requestAnimationFrame(animate);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            baseballs.forEach((baseball, index) => {
-                baseball.update();
-                if (baseball.y > canvas.height + baseball.radius) {
-                    baseballs.splice(index, 1);
-                }
-            });
+            drawBat();
+            drawBall();
+            moveBall();
         }
 
-        document.addEventListener('click', throwBaseball);
+        canvas.addEventListener('mousemove', (e) => {
+            bat.x = e.clientX;
+            bat.y = e.clientY;
+        });
+
         window.addEventListener('resize', resizeCanvas);
 
-        animate();
+        // game toggle
+        const baseballToggle = document.getElementById('baseball-toggle');
+        const baseballCanvas = document.getElementById('baseball-canvas');
+        let isBaseballActive = false;
+
+        baseballToggle.addEventListener('click', () => {
+            isBaseballActive = !isBaseballActive;
+            baseballCanvas.style.display = isBaseballActive ? 'block' : 'none';
+            scoreDisplay.style.display = isBaseballActive ? 'block' : 'none';
+            if (isBaseballActive) {
+                score = 0;
+                updateScore();
+                animate();
+            }
+        });
     </script>
 </body>
 </html>
